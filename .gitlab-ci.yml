@@ -1,5 +1,3 @@
-image: hub.pri.ibanyu.com/library/golang:1.12.4
-
 stages:
   - test
 
