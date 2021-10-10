@@ -1,0 +1,2 @@
+cat to/set_generic.go | genny gen "T=string,int,int64,float64,byte,interface{}" > to/set.go
+cat collection/collection_generic.go | genny gen "T=string,int,int64,float64,byte,interface{}" > collection/collection.go

@@ -1,0 +1,10 @@
+image: hub.pri.ibanyu.com/library/golang:1.12.4
+
+stages:
+  - test
+
+unit_tests:
+  stage: test
+  script:
+    - go test ./... -coverprofile=c.out
+    - go tool cover -func=c.out
