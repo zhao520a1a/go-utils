@@ -1,8 +1,0 @@
-stages:
-  - test
-
-unit_tests:
-  stage: test
-  script:
-    - go test ./... -coverprofile=c.out
-    - go tool cover -func=c.out
