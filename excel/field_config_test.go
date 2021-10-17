@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/zhao520a1a/go-utils.git/excel"
+	"github.com/zhao520a1a/go-utils/excel"
 )
 
 type StandardFieldConfig excel.Standard

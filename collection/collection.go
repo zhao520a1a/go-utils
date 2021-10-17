@@ -4,7 +4,7 @@
 
 package collection
 
-import "github.com/zhao520a1a/go-utils.git/to"
+import "github.com/zhao520a1a/go-utils/to"
 
 // StringReverseInPlace reverses the []String in place.
 func StringReverseInPlace(ts []string) {

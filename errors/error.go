@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/zhao520a1a/go-utils.git/collection"
+	"github.com/zhao520a1a/go-utils/collection"
 )
 
 // TODO:

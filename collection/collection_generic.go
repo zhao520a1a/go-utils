@@ -1,8 +1,8 @@
 package collection
 
 import (
-	"github.com/zhao520a1a/go-utils.git/to"
-	. "github.com/zhao520a1a/go-utils.git/types"
+	"github.com/zhao520a1a/go-utils/to"
+	. "github.com/zhao520a1a/go-utils/types"
 )
 
 // TReverseInPlace reverses the []T in place.

@@ -1,6 +1,6 @@
 package to
 
-import . "github.com/zhao520a1a/go-utils.git/types"
+import . "github.com/zhao520a1a/go-utils/types"
 
 // TSet converts []T to map[T]interface{}, with all values equal
 // to struct{}{}, to simulate a Set.
