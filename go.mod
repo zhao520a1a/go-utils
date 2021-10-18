@@ -1,6 +1,6 @@
 module github.com/zhao520a1a/go-utils
 
-go 1.15
+go 1.16
 
 require (
 	github.com/cheekybits/genny v1.0.1-0.20200709201058-3e22f1a88ff2
