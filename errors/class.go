@@ -7,4 +7,5 @@ const (
 	NotFound   Class = "not_found"         // Entity does not exist
 	PermDenied Class = "permission_denied" // Does not have permission
 	Other      Class = "other"             // Unclassified error
+
 )
