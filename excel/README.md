@@ -6,11 +6,11 @@
 
 ## 目标
 
-期望创建一个阅读器库以轻松阅读类似excel，就像读取 DB 中数据一样。
+期望创建一个阅读器库以轻松阅读类似excel，就像读取 DB 中数据一样。Cancel changes
 
 ## 示例
 
-> 所有的示例可以移步查看 [excel/excel_test.go](excel/excel_test.go).
+> 所有的示例可以移步查看 [decode_test.go](decode_test.go).
 
 假设你有一个如下的 excel 文件（第一行是表头，其他行是内容）：
 
@@ -119,7 +119,7 @@ type Config struct {
 ## XLSX Field Config | 字段的解析配置
 
 有时处理转义字符有点麻烦，所以实现`GetXLSXFieldConfigs() map[string]FieldConfig`的接口将比`tag`
-更优先提供字段配置，更多信息请看测试文件[excel/field_config_test.go](excel/field_config_test.go)。
+更优先提供字段配置，更多信息请看测试文件[field_config_test.go](field_config_test.go)。
 
 ## 参考资料
 
