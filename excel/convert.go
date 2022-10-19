@@ -2,7 +2,9 @@ package excel
 
 import (
 	"fmt"
+	"math"
 	"strconv"
+	"time"
 )
 
 // GetString 转换一个对象为string
@@ -64,7 +66,7 @@ func ToInt(value interface{}) (res int, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 				if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -167,7 +169,7 @@ func ToInt8(value interface{}) (res int8, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 				if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -270,7 +272,7 @@ func ToInt16(value interface{}) (res int16, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 				if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -374,7 +376,7 @@ func ToInt32(value interface{}) (res int32, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 				if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -477,7 +479,7 @@ func ToInt64(value interface{}) (res int64, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 				if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -576,7 +578,7 @@ func ToUint(value interface{}) (res uint, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 				if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -679,7 +681,7 @@ func ToUint8(value interface{}) (res uint8, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 				if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -782,7 +784,7 @@ func ToUint16(value interface{}) (res uint16, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 				if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -885,7 +887,7 @@ func ToUint32(value interface{}) (res uint32, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 				if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -988,7 +990,7 @@ func ToUint64(value interface{}) (res uint64, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 				if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
 					if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
@@ -1090,7 +1092,7 @@ func ToFloat32(value interface{}) (res float32, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
 				if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 					if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
@@ -1193,7 +1195,7 @@ func ToFloat64(value interface{}) (res float64, err error) {
 			if len(valueString) == 0 {
 				return 0, nil
 			}
-			//string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
+			// string的情况比较复杂，需要继续区分string是bool、float、int、uint再处理
 			if resF64, erro := strconv.ParseFloat(valueString, 0); erro != nil {
 				if resU64, erro := strconv.ParseUint(valueString, 0, 0); erro != nil {
 					if res64, erro := strconv.ParseInt(valueString, 0, 0); erro != nil {
@@ -1281,5 +1283,26 @@ func ToFloat64(value interface{}) (res float64, err error) {
 			res, err = ToFloat64(valueStr)
 		}
 	}
+	return
+}
+
+func ToTime(v interface{}) (t time.Time, err error) {
+	switch fv := v.(type) {
+	case string:
+		t = GetXlsxTimeValues(fv)
+		return
+	default:
+		err = fmt.Errorf("不支持时间类型")
+	}
+	return
+}
+
+// Hack: 实现上有偏差 参考：https://blog.csdn.net/qq_15043089/article/details/118612717#circle=on
+func GetXlsxTimeValues(xlsxTime string) (localTime time.Time) {
+	fTime, _ := strconv.ParseFloat(xlsxTime, 64)
+	nTime := int(math.Floor(fTime))
+	ledgerDate1900, _ := time.Parse("2006/1/2", "1900/1/1")
+	prevMonth := ledgerDate1900.AddDate(0, 0, int(math.Floor(fTime))-2)
+	localTime = time.Unix(prevMonth.Unix()+int64(math.Floor((fTime-float64(nTime))*86400))-28800, 0)
 	return
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var (
@@ -168,6 +169,8 @@ var expectStandardSliceList = [][]string{
 
 // defined a struct
 type Standard struct {
+	Time time.Time `xlsx:"Time"`
+
 	// use field name as default column name
 	ID int
 	// column means to map the column name
@@ -210,6 +213,10 @@ func TestReadStandardSimple(t *testing.T) {
 		t.Error(err)
 		return
 	}
+	for _, standard := range stdList {
+		fmt.Println(standard.Time.Format("2006-01-02 15:04:05"))
+	}
+
 	if !reflect.DeepEqual(stdList, expectStandardList) {
 		t.Errorf("unexprect std list: %s", MustJsonPrettyString(stdList))
 	}

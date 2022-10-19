@@ -4,6 +4,7 @@ import (
 	"encoding"
 	"fmt"
 	"reflect"
+	"time"
 )
 
 // ref: gopkg.in/redis.v5
@@ -53,6 +54,8 @@ func scan(s string, ptr interface{}) error {
 		*p, err = ToFloat64(s)
 	case *bool:
 		*p, err = ToBool(s)
+	case *time.Time:
+		*p, err = ToTime(s)
 	case encoding.BinaryUnmarshaler:
 		if err = p.UnmarshalBinary([]byte(s)); err != nil {
 			err = fmt.Errorf("can't unmarshar by encoding.BinaryUnmarshaler: %s", err)
