@@ -17,9 +17,7 @@ title: "错误处理"
 * 应用程序本身 (application)
 * 服务的用户 (end user)
 * 服务的维护者 (operator)
-
-我们的 dry (don't repeat yourself) [项目](https://gitlab.pri.ibanyu.com/quality/dry)中的[errors](https://gitlab.pri.ibanyu.com/quality/dry/tree/master/errors) 模块，正是为这个目的而诞生。
-
+ 
 ## error handling 的最佳实践
 
 接下来我们阐述如何利用 dry 的 errors 模块完成我们日常项目开发的 error handling 需求。
@@ -44,10 +42,6 @@ func GetOneWorkflow(ctx context.Context, db manager.XDB, where map[string]interf
 这里用到了 `errors.New`，在 dry 的 errors package 中，我们同样提供了 `New` 函数，因此只需替换依赖即可：
 
 ```go
-import (
-	"gitlab.pri.ibanyu.com/quality/dry.git/errors"
-)
-
 func GetOneWorkflow(ctx context.Context, db manager.XDB, where map[string]interface{}) (*bpm.Workflow, error) {
 	if nil == db {
 		return nil, errors.New("manager.XDB object couldn't be nil")
