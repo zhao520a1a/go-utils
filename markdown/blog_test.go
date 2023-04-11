@@ -6,10 +6,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
 
+// 读取文件夹，在文件头部加"title"标签
 func TestAddTitle(t *testing.T) {
 	// 读取命令行参数
 	//if len(os.Args) < 3 {
@@ -53,11 +55,7 @@ func TestAddTitle(t *testing.T) {
 				}
 				fmt.Println("处理完成：", file.Name())
 			}
-
-			// 在内容开头加入标签和分类
-			//content = "---\ntags: [go]\ncategories: [编码规范]\n---\n\n" + content
 		}
-
 		return nil
 	})
 
@@ -82,4 +80,67 @@ func writeStringToFile(filePath string, content string) error {
 
 	writer.Flush()
 	return nil
+}
+
+// 转化文件中的图片标签
+/*
+用 Go 语言编码实现如下：正则表达式匹配 Markdown 语法中的图片标签 ![xxx](xxx)，将匹配到的内容替换成 <img src="xxx" alt="img" />
+*/
+
+func TestConvertImgTag(t *testing.T) {
+	srcDir := "/Users/golden/Downloads/zhao520a1a.github.io-hexo/source/_posts/内部原理"
+	destDir := "/Users/golden/Desktop/tmp"
+	// 遍历源文件夹下的Markdown文件
+	err := filepath.Walk(srcDir, func(path string, file os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		// 判断是否为Markdown文件
+		if strings.ToLower(filepath.Ext(path)) == ".md" {
+			fmt.Println("正在处理文件：", path)
+			// 读取文件内容
+			contentBytes, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			content := ConvertMarkdownImg(string(contentBytes))
+			newFilePath := filepath.Join(destDir, file.Name())
+			if err := writeStringToFile(newFilePath, content); err != nil {
+				err = fmt.Errorf("写入文件失败：%v", err)
+				return err
+			}
+			fmt.Println("处理完成：", file.Name())
+		}
+		return nil
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func TestMatchMarkdownImg(t *testing.T) {
+	text := "This is an ![example](https://example.com/image.png) image.  ![xxx](https://xxx.com/image.png) "
+	result := ConvertMarkdownImg(text)
+	fmt.Println(text)
+	fmt.Println(result)
+}
+
+func ConvertMarkdownImg(text string) string {
+	pattern := `!\[.*?\]\(.*\)`
+	re := regexp.MustCompile(pattern)
+	matches := re.FindAllString(text, -1)
+	result := text
+	for _, match := range matches {
+		prefix := strings.Split(match, "(")[0]
+		temp := strings.TrimPrefix(match, prefix+"(")
+		imgHref := strings.TrimSuffix(temp, ")")
+		// 特殊处理
+		imgHref = strings.ReplaceAll(imgHref, ".resources", "")
+		imgStr := fmt.Sprintf(`<img src="%s" alt="img" />`, imgHref)
+		result = strings.ReplaceAll(result, match, imgStr)
+		fmt.Println(match)
+		fmt.Println(imgStr)
+
+	}
+	return result
 }
