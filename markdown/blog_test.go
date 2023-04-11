@@ -25,7 +25,7 @@ func TestAddTitle(t *testing.T) {
 	//}
 	//srcDir, destDir := args[0], args[1]
 	srcDir := "/Users/Golden/Documents/Blog/source/_posts"
-	destDir := "/Users/Golden/Desktop/tmp"
+	destDir := "/Users/golden/Desktop/tmp"
 	// 遍历源文件夹下的Markdown文件
 	err := filepath.Walk(srcDir, func(path string, file os.FileInfo, err error) error {
 		if err != nil {
@@ -88,7 +88,7 @@ func writeStringToFile(filePath string, content string) error {
 */
 
 func TestConvertImgTag(t *testing.T) {
-	srcDir := "/Users/golden/Downloads/zhao520a1a.github.io-hexo/source/_posts/内部原理"
+	srcDir := "/Users/Golden/Documents/Blog/source/_posts/踩坑记录"
 	destDir := "/Users/golden/Desktop/tmp"
 	// 遍历源文件夹下的Markdown文件
 	err := filepath.Walk(srcDir, func(path string, file os.FileInfo, err error) error {
