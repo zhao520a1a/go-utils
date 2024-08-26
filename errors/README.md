@@ -4,11 +4,207 @@ weight: 5
 title: "错误处理"
 ---
 
-# 错误处理
-
+# 引
 错误即 error，在 Go 程序中通常以 err 之名存在；错误处理即 error handling，指我们如何在 Go 程序中合理地处理错误。为了避免歧义，本文剩余内容将直接使用错误的英文单词 error 代替。
 
 关于本话题的详细调研内容请参考这篇[博客](https://zhenghe-md.github.io/blog/2020/10/05/Go-Error-Handling-Research/)，本文的重心在于阐述最终选择的**最佳实践**。
+
+> 希望以此此文建立更加扎实的工程实践方法论，进一步提升交付项目质量。
+
+- 前端错误信息可读性差
+- 后端服务识别报错困难
+```go
+if strings.Contains(err.Error(), m) {
+    tracelog.Info(ctx, fmt.Sprintf("ignore err :%v", err))
+    return 
+}
+
+ErrEmptyResult = errors.New(`[scanner]: empty result`)
+if err == scanner.ErrEmptyResult {
+    err = nil
+}
+```
+# 道 
+相关术语说明：
+
+| **英文** | **中文** |
+| --- | --- |
+| error-code-based | 基于错误码 |
+| exception-based | 基于异常 |
+| error wrapping/unwrapping | 包装错误/解包装 |
+| error inspection | 错误检查 |
+| error formatting | 错误格式化 |
+| error chain | 错误链表，即通过包装将错误组织成链表结构 |
+| error class | 错误类别、类型 |
+
+## 错误处理方式？
+通常错误处理方案分为两种：error-code-based 和 exception-based。很早就有人 [指出 exception-based 错误处理更不利于写出优质的代码](https://devblogs.microsoft.com/oldnewthing/20050114-00/?p=36693)，也更难辨别优质和劣质的代码； Go 在设计时选择了 error-code-based error handling 方案，许多来自 Java、Python 等语言的工程师习惯了 exception-based 的方案，遇到 Go 时感到十分不习惯，本质原因是不了解语法后面的设计理念。
+## Go 语法的设计理念？
+### "happy path" 与 "sad path" 地位相同
+如果我们将函数的正常逻辑路径称为 "happy path"，异常逻辑路径称为 "sad path"。在使用 exception-based error handling 的编程语言时，工程师认为 "sad path" 是一种需要额外考虑的特殊情况，需要特殊对待；而在 Go 开发者眼里，"happy path" 和 "sad path" 都是一般的情况，二者应该同样重要，被同等对待。
+```go
+// Go 鼓励工程师将逻辑的 "happy path" 留在函数缩进的最外层，而把 "sad path" 放到第二级缩进中；
+// 采用 fail-fast 的策略结束执行，不要使用其它返回值的特征作为调用成功与否的依据
+func Do() (ret interface{}, err error) {
+    // happy path
+    v1, err := A()
+    if err != nil {
+      // sad path 1
+  }
+
+    v2, err := B(v1)
+    if err != nil {
+      // sad path 2
+  }
+
+    ret = process(v1, v2)
+    return
+}
+```
+### errors are values
+任何实现了 Error 接口的数据类型都是 error，它们与字符串、整数、结构体相比并没有特别之处。Go 官博中提出了[Errors are values](https://blog.golang.org/errors-are-values)的理念，鼓励开发者显式地在 error 出现的地方直接处理，任何实现了 Error 接口的数据类型都是 error，它们与字符串、整数、结构体相比并没有特别之处。
+## 都有谁关心 error？
+在任意一个服务的生命周期中，通常至少有 3 个角色关心 error：
+### 应用程序与error
+error 类型检查 面向的是应用程序，用于逻辑判断；应用程序可能拥有各种各样的外部依赖，比如第三方服务、内部 RPC 服务、数据库服务、消息队列服务等。应用程序需要能够准确、方便、健壮地获取 error 特征，从容地根据 error 的特点处理。
+### 程序维护者与error
+遇到线上问题时，服务的维护者接到报警后，需要根据详细的 error 信息做根源分析，这时信息越多越好，当然更高的可读性能够帮助维护人员更快地定位问题，解决问题。
+PS：一个设计精良的 errors package 要能够让工程师自如地处理 error 与各个角色之间的信息传递。
+### 用户 与 error
+当服务运行遇到 error 时，需要向普通的 C 端用户提供友好、明确的消息提示，让他明白系统正处于异常状态，可以稍后重试或联系客服、技术人员。消息应该是对人类友好的自然语言。除此之外，系统内部的细节，如错误栈信息，不应当直接暴露给 C 端用户，对于未明确定义的 error 更应如此。主要原因在于：
+
+- 用户不应该关心服务的实现细节
+- 暴露不必要的细节可能会降低系统安全性
+# 术
+## error handling 涉及那些方面？
+
+- checking：判断 error 发生与否
+- inspection：检查 error 类型
+- formatting ：打印 error 上下文。
+
+很多大佬针对上面的环节，提出了自己的优化见解，如：Russ Cox 早在 2018 年末发布了两个新提议：
+
+- [Error Handling](https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md) - 尝试解决 checking 代码冗长的问题；
+- [Error Values](https://go.googlesource.com/proposal/+/master/design/go2draft-error-values-overview.md) - 尝试解决 inspection 的信息丢失以及 formatting 的上下文信息不足问题;
+## error 上下文 != 堆栈信息？
+为什么采用堆栈信息不行？这里引用 [GopherCon 2019](https://about.sourcegraph.com/blog/go/gophercon-2019-handling-go-errors) 中工程师的观点，原因如下：
+
+- 它们很难阅读
+- 它们很难解析
+- 它们说的是哪里出错了，而不是为什么
+## error 的逻辑调用栈是啥？
+Ben Johnson 提出 [Failure is your Domain](https://middlemost.com/failure-is-your-domain/) 的观点，认为每个项目应当构建特有的 error handling package，并提出逻辑调用栈 (logical stack) 的概念；针对 error 多层嵌套调用场景下的上下文注入问题，采用 error wrapping 的方式给程序提供额外的信息，用于后续决策。之后我们还能做什么？
+
+- 按严重性对错误进行分类。
+- 按类型对错误进行分类。
+- 添加特定于应用程序的数据。
+- 查询以上所有内容
+## 方案调研
+> 抄作业，先看看别人咋做的？
+
+### 官方SDK
+
+- Go 1.13 以前：提供 Error 接口及 errors.New、fmt.Errorf 两个构建 error 的方法，建议创建一个实现错误接口的自定义结构，并将原始错误作为该结构上的字段，例如：[PathError](https://pkg.go.dev/os#PathError)。
+- Go 1.13 以后：提供类似的原生解决方案，支持利用 %w 格式化符号实现 [error wrapping](https://go.dev/blog/go1.13-errors)，并提供 Unwrap、errors.Is 以及 errors.As 来解决 error inspection 的问题。
+### 社区轮子
+> Go 社区的开发者们因为语言本身对 error handling 的支持不足，因此创造各种各样的轮子；
+
+| 代码库 | 特点 |
+| --- | --- |
+| [juju errors](https://github.com/juju/errors) | 在 wrap error 时，可以选择保留或隐藏 error 产生的原因 (cause)，但它的 Cause 方法仅 unwrap 一层。 |
+| [pkg/errors](https://github.com/pkg/errors) | 由 Go 核心工程师 R Dave Cheney 的开发被广泛使用。
+提供 wrapping 和调用栈捕获的功能，并利用 %+v 格式化 error，会递归地遍历 error chain，展示更多的细节，它认为只有整个 error chain 最末端的 error 最有价值。 |
+| [upspin err](https://github.com/upspin/upspin/tree/master/errors) | 定制化 error 的实践范本，同时引入了 errors.Is 和 errors.Match 用于辅助检查 error 类型。 |
+| [hashicorp/errwrap](https://github.com/hashicorp/errwrap) | 支持将 errors 组织成树状结构，并提供 Walk 方法遍历这棵树。
+
+ |
+| [pingcap parser errors](https://github.com/pingcap/parser/blob/release-3.0/terror/terror.go) | 在 pkg/errors 的基础上二次开发，并增加了 error 类的概念。 |
+| [cockroachdb/errors](https://github.com/cockroachdb/errors) | 考虑了 error 在进程间传递的场景，让 error handling 具备网络传播兼容能力。 |
+
+# 器
+## 当前现状
+目前，内部生产环境使用 Go 1.16 +，通查项目中都有这样一个基本的 error handling 工具类(虽然你有，我也不一定用)，此外服务研发团队内部并没有统一 error handling 规范与方案。
+```go
+type XError struct {
+    code int
+    err  error
+}
+
+// code 与 msg 是一一绑定的
+errMsg = map[errorCode]string{
+    CommonErrCode: "",
+    MysqlErrCode:  "mysql",
+    RedisErrCode:  "redis",
+}
+```
+
+下面我整几段代码，先抛开代码逻辑的正确性，只谈 error handling 逻辑，看看错误是被如何处理的？
+```go
+// RPC 请求
+func baseRequest(ctx context.Context, url string, params map[string]string) (interface{}, error) {
+    b, err := client.RequestWithContext(ctx, conf.URL+url, client.BuildOptions(&client.Options{
+      Method:           "GET",
+      Headers:          map[string][]string{},
+      Params:           params,
+      Timeout:          conf.Timeout,
+      HostWithVip:      conf.VipHost,
+      RecordWithParams: true,
+  }))
+    if err != nil {
+      // ① - 纯通过手动拼接函数名的方式，便于生成日志，格式混乱，容易遗忘；
+      traceerror.Error(ctx, fmt.Sprintf("#coupon#baseRequest##error# res=%v,err=%v", string(b), err))
+      // ② - 不包装 error 上下文信息，同一错误在日志展现上是不同的；
+      return nil, err
+  }
+
+    var resp *Resp
+    if err = json.Unmarshal(b, &resp); err != nil {
+      return nil, err
+  }
+    if resp.Code != "1" {
+      return nil, xerror.New(resp.Message)
+  }
+    return resp.Data, nil
+}
+```
+```go
+func OnlineStrategyFlow(ctx context.Context, flowID int64) (map[int64]*UpFlowResult, int64, error) {
+    // ③ - 方便复用对，函数名做了声明，但日志拼接格式还是很混乱；
+    fun := "#STRATEGY#OnlineStrategyFlow#"
+    logger.Infof(ctx, "%s 策略流上线开始执行.flowID:%d", fun, flowID)
+    strategies, err := service3.QueryStrategyInFlow(ctx, flowID)
+    if err != nil {
+      return nil, 0, err
+  }
+
+    if len(strategies) == 0 {
+      logger.Errorf(ctx, "%s 策略流下策略信息不存在.flow_id:%d", fun, flowID)
+      // ④ - 使用了特定 error，但却丢失了错误上下文；
+      return nil, 0, xerror.ErrDBResEmpty
+  }
+
+}
+```
+```go
+func (o *Crowd) ScanRecordSyncData(ctx context.Context, bind xgin.Bind) (ret interface{}, err error) {
+    var req crowd_service.ScanParam
+    if err = bind(&req); err != nil {
+      // ⑤ - 采用了 error code ，但没有当前函数信息；
+      return nil, xerror.WrapCode(xerror.CommonErrCode, err)
+  }
+    return o.CrowdModule.ScanRecordSyncData(ctx, req)
+}
+```
+造成的后果：
+
+- error 被多次日志打印，重复冗余干扰问题定位，并影响监控配置；
+- error 判断困难，无法区分特定error；
+- error 上下文信息丢失，没有当前函数信息，更无法串联出逻辑调用栈；
+
+==> **前端报错没有可读性，全靠 traceId 和个人经验来定位问题！！**
+
+
+
 
 ## error 的消费者
 
